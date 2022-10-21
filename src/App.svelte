@@ -19,6 +19,11 @@
     state.isEditing = false;
   }
 
+  function cancelEditMode() {
+    state.isEditing = false;
+    inputValue = state.attendees.join(", ");
+  }
+
   function shuffleAttendees() {
     state.shuffled = shuffle(state.attendees);
     state.lastShuffled = new Date().toISOString();
@@ -30,20 +35,21 @@
 </script>
 
 <div style="margin-top: -4px;">
-<span style="margin-right: 10px; font-size: 18px;">🕴</span>
+  <span style="margin-right: 10px; font-size: 18px;">🕴</span>
 
-{#if state.isEditing}
-  <form on:submit={onSave}>
-    <input placeholder="Comma-separated list of people" bind:value={inputValue} style="margin-right: 10px;" />
-  <button class="aui-button" type="submit">Save</button>
-  </form>
-{/if}
+  {#if state.isEditing}
+    <form on:submit={onSave}>
+      <input placeholder="Comma-separated list of people" bind:value={inputValue} style="margin-right: 10px;" />
+    <button class="aui-button" type="submit">Save</button>
+    <button class="aui-button" on:click={cancelEditMode}>❌</button>
+    </form>
+  {/if}
 
-{#if !state.isEditing}
-  <span style="margin-right: 10px;">{state.shuffled.join(' → ')}</span>
+  {#if !state.isEditing}
+    <span style="margin-right: 10px;">{state.shuffled.join(' → ')}</span>
     <button class="aui-button" on:click={shuffleAttendees}>🔀</button>
-  <button class="aui-button" on:click={onEditClick}>✏️</button>
-{/if}
+    <button class="aui-button" on:click={onEditClick}>✏️</button>
+  {/if}
 </div>
 
 <style>
