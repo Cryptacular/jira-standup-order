@@ -1,8 +1,40 @@
-import './app.css'
-import App from './App.svelte'
+import App from "./App.svelte";
 
-const app = new App({
-  target: document.getElementById('app')
-})
+let hasInitialised = false;
 
-export default app
+const isOnJiraBoard = () => {
+  const regex = new RegExp(
+    /^\/jira\/software\/c\/projects\/\w+\/boards\/\d+$/g
+  );
+  return regex.test(window.location.pathname);
+};
+
+const isPageReady = () => {
+  const quickFiltersList = document.querySelector("#ghx-quick-filters > ul");
+  return !!quickFiltersList;
+};
+
+const jiraStandupOrderContainerId = "jiraStandupOrderContainer";
+
+const init = () => {
+  const quickFiltersList = document.querySelector("#ghx-quick-filters > ul");
+  const listItem = document.createElement("li");
+  listItem.id = jiraStandupOrderContainerId;
+  quickFiltersList.appendChild(listItem);
+};
+
+setInterval(() => {
+  if (isOnJiraBoard()) {
+    if (isPageReady() && !hasInitialised) {
+      hasInitialised = true;
+      setTimeout(() => {
+        init();
+        new App({
+          target: document.getElementById(jiraStandupOrderContainerId),
+        });
+      }, 500);
+    }
+  } else {
+    hasInitialised = false;
+  }
+}, 500);
