@@ -7,6 +7,7 @@ export function getState() {
     attendees: [],
     shuffled: [],
     skipped: [],
+    currentAttendee: null,
     lastShuffled: null,
   };
 

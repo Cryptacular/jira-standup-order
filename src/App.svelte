@@ -8,6 +8,7 @@
   import ArrowRightIcon from "./icons/ArrowRightIcon.svelte";
   import CheckIcon from "./icons/CheckIcon.svelte";
   import CancelIcon from "./icons/CancelIcon.svelte";
+  import NextIcon from "./icons/NextIcon.svelte";
 
   let state = getState();
   $: setState(state);
@@ -18,6 +19,7 @@
   }
   
   let isEditing = state.attendees.length === 0;
+  let inputField;
   let inputValue = "";
 
   /**
@@ -28,6 +30,7 @@
     state.attendees = [...state.attendees, inputValue.trim()]
     state.shuffled = [...state.shuffled, inputValue.trim()]
     isEditing = false;
+    inputValue = "";
   }
 
   function cancelEditMode() {
@@ -36,13 +39,39 @@
   }
 
   function shuffleAttendees() {
+    if (state.attendees.length === 0) {
+      return;
+    }
+
     const shuffled = shuffle(state.attendees);
-    state.shuffled = [...shuffled.filter(s => !state.skipped.some(h => h === s)), ...state.skipped];
+    const unskipped = shuffled.filter(s => !state.skipped.some(h => h === s));
+    state.shuffled = [...unskipped, ...state.skipped];
     state.lastShuffled = new Date().toISOString();
+    state.currentAttendee = unskipped.length > 0 ? unskipped[0] : null;
   }
 
   function onAddClick() {
     isEditing = true;
+    setTimeout(() => {
+      inputField.focus();
+    }, 100);
+  }
+
+  function onNextClick() {
+    if (state.currentAttendee === null) {
+      state.currentAttendee = state.shuffled[0];
+      return;
+    }
+
+    const currentIndex = state.shuffled.indexOf(state.currentAttendee);
+    const nextIndex = currentIndex + 1;
+    const unSkippedAttendees = state.shuffled.filter(s => !state.skipped.some(h => h === s));
+
+    if (nextIndex < unSkippedAttendees.length) {
+      state.currentAttendee = unSkippedAttendees[nextIndex];
+    } else {
+      state.currentAttendee = null;
+    }
   }
 
   /**
@@ -77,6 +106,13 @@ function handleUnskip(person) {
   function isSkipped(person) {
     return state.skipped ? state.skipped.some((/** @type {string} */ h) => h === person) : false;
   }
+
+/**
+ * @param {string} person
+ */
+function isCurrent(person) {
+  return state.currentAttendee === person;
+}
 </script>
 
 <div style="margin-top: -4px;">
@@ -88,18 +124,21 @@ function handleUnskip(person) {
         <ArrowRightIcon />
       {/if}
 
-      <Person name={person} isSkipped={isSkipped(person)} onSkip={() => handleSkip(person)} onUnskip={() => handleUnskip(person)} onDelete={() => handleDelete(person)} />
+      <Person name={person} isCurrent={isCurrent(person)} isSkipped={isSkipped(person)} onSkip={() => handleSkip(person)} onUnskip={() => handleUnskip(person)} onDelete={() => handleDelete(person)} />
     {/each}
   </span>
 
   {#if !isEditing}
+    {#if state.shuffled.length > 0}
+      <button class="aui-button" on:click={onNextClick}><NextIcon /></button>
+      <button class="aui-button" on:click={shuffleAttendees}><ShuffleIcon /></button>
+    {/if}
     <button class="aui-button" on:click={onAddClick}><PlusIcon /></button>
-    <button class="aui-button" on:click={shuffleAttendees}><ShuffleIcon /></button>
   {/if}
 
   {#if isEditing}
     <form on:submit={onSave}>
-      <input placeholder="Name" bind:value={inputValue} style="margin-right: 10px;" />
+      <input placeholder="Name" bind:this={inputField} bind:value={inputValue} style="margin-right: 10px;" />
       <button class="aui-button" type="submit"><CheckIcon /></button>
       <button class="aui-button" on:click={cancelEditMode}><CancelIcon /></button>
     </form>

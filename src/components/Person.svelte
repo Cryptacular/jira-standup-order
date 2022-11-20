@@ -4,6 +4,7 @@
     import TrashIcon from "../icons/TrashIcon.svelte";
 
 	export let name;
+    export let isCurrent;
     export let isSkipped;
     export let onSkip;
     export let onUnskip;
@@ -21,7 +22,7 @@
 </script>
 
 <span class="container" on:mouseenter={enter} on:mouseleave={leave}>
-    <span class={(hovering ? "overlay " : "") + (isSkipped ? "skipped " : "")}>
+    <span class={(hovering ? "overlay " : "") + (isSkipped ? "skipped " : "") + (isCurrent ? "current " : "")}>
         {name}
     </span>
     {#if hovering}
@@ -51,6 +52,10 @@
         opacity: 0.2;
         font-style: italic;
         text-decoration: line-through;
+    }
+
+    .current {
+        font-weight: bold;
     }
 
     .buttons {
