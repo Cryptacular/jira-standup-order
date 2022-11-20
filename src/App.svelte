@@ -2,53 +2,107 @@
   import { shuffle } from "./lib/shuffle";
   import { getState, setState } from "./lib/localStorage";
   import { isToday } from "./lib/isToday";
+  import Person from "./components/Person.svelte";
+  import PlusIcon from "./icons/PlusIcon.svelte";
+  import ShuffleIcon from "./icons/ShuffleIcon.svelte";
+  import ArrowRightIcon from "./icons/ArrowRightIcon.svelte";
+  import CheckIcon from "./icons/CheckIcon.svelte";
+  import CancelIcon from "./icons/CancelIcon.svelte";
 
   let state = getState();
   $: setState(state);
-
+  
   if (!isToday(state.lastShuffled)) {
     shuffleAttendees();
+    state.skipped = [];
   }
+  
+  let isEditing = state.attendees.length === 0;
+  let inputValue = "";
 
-  let inputValue = state.attendees.join(", ");
-
+  /**
+   * @param {{ preventDefault: () => void; }} e
+   */
   function onSave(e) {
     e.preventDefault();
-    state.attendees = inputValue.split(",").map((x) => x.trim()) || [];
-    shuffleAttendees();
-    state.isEditing = false;
+    state.attendees = [...state.attendees, inputValue.trim()]
+    state.shuffled = [...state.shuffled, inputValue.trim()]
+    isEditing = false;
   }
 
   function cancelEditMode() {
-    state.isEditing = false;
-    inputValue = state.attendees.join(", ");
+    isEditing = false;
+    inputValue = "";
   }
 
   function shuffleAttendees() {
-    state.shuffled = shuffle(state.attendees);
+    const shuffled = shuffle(state.attendees);
+    state.shuffled = [...shuffled.filter(s => !state.skipped.some(h => h === s)), ...state.skipped];
     state.lastShuffled = new Date().toISOString();
   }
 
-  function onEditClick() {
-    state.isEditing = true;
+  function onAddClick() {
+    isEditing = true;
+  }
+
+  /**
+   * @param {string} person
+   */
+  function handleSkip(person) {
+    if (!state.skipped?.some((/** @type {string} */ h) => h === person)) {
+      state.skipped = [...state.skipped, person]
+    }
+  }
+
+/**
+ * @param {string} person
+ */
+function handleUnskip(person) {
+  if (state.skipped?.some((/** @type {string} */ h) => h === person)) {
+    state.skipped = state.skipped.filter((/** @type {string} */ s) => s !== person)
+  }
+}
+
+  /**
+   * @param {string} person
+   */
+  function handleDelete(person) {
+    state.attendees = state.attendees.filter((/** @type {string} */ a) => a !== person);
+    state.shuffled = state.shuffled.filter((/** @type {string} */ a) => a !== person);
+  }
+
+  /**
+   * @param {string} person
+   */
+  function isSkipped(person) {
+    return state.skipped ? state.skipped.some((/** @type {string} */ h) => h === person) : false;
   }
 </script>
 
 <div style="margin-top: -4px;">
   <span style="margin-right: 10px; font-size: 18px;">🕴</span>
 
-  {#if state.isEditing}
-    <form on:submit={onSave}>
-      <input placeholder="Comma-separated list of people" bind:value={inputValue} style="margin-right: 10px;" />
-    <button class="aui-button" type="submit">Save</button>
-    <button class="aui-button" on:click={cancelEditMode}>❌</button>
-    </form>
+  <span style="margin-right: 10px; display: inline-flex; align-items: center;">
+    {#each state.shuffled as person, i}
+      {#if i !== 0}
+        <ArrowRightIcon />
+      {/if}
+
+      <Person name={person} isSkipped={isSkipped(person)} onSkip={() => handleSkip(person)} onUnskip={() => handleUnskip(person)} onDelete={() => handleDelete(person)} />
+    {/each}
+  </span>
+
+  {#if !isEditing}
+    <button class="aui-button" on:click={onAddClick}><PlusIcon /></button>
+    <button class="aui-button" on:click={shuffleAttendees}><ShuffleIcon /></button>
   {/if}
 
-  {#if !state.isEditing}
-    <span style="margin-right: 10px;">{state.shuffled.join(' → ')}</span>
-    <button class="aui-button" on:click={shuffleAttendees}>🔀</button>
-    <button class="aui-button" on:click={onEditClick}>✏️</button>
+  {#if isEditing}
+    <form on:submit={onSave}>
+      <input placeholder="Name" bind:value={inputValue} style="margin-right: 10px;" />
+      <button class="aui-button" type="submit"><CheckIcon /></button>
+      <button class="aui-button" on:click={cancelEditMode}><CancelIcon /></button>
+    </form>
   {/if}
 </div>
 
@@ -58,9 +112,10 @@
   }
 
   button {
-      padding-left: 10px !important;
-      padding-right: 10px !important;
-      font-weight: 500;
+    margin-left: 0;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+    font-weight: 500;
   }
 
   input {
@@ -72,6 +127,6 @@
     border-width: 2px;
     border-style: solid;
     margin-right: 10px;
-    width: 200px;
+    width: 50px;
   }
 </style>
