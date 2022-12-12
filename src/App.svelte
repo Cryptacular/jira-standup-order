@@ -63,9 +63,9 @@
       return;
     }
 
-    const currentIndex = state.shuffled.indexOf(state.currentAttendee);
-    const nextIndex = currentIndex + 1;
     const unSkippedAttendees = state.shuffled.filter(s => !state.skipped.some(h => h === s));
+    const currentIndex = unSkippedAttendees.indexOf(state.currentAttendee);
+    const nextIndex = currentIndex + 1;
 
     if (nextIndex < unSkippedAttendees.length) {
       state.currentAttendee = unSkippedAttendees[nextIndex];
