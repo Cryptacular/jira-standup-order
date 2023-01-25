@@ -116,8 +116,6 @@ function isCurrent(person) {
 </script>
 
 <div style="margin-top: -4px;">
-  <span style="margin-right: 10px; font-size: 18px;">🕴</span>
-
   <span style="margin-right: 10px; display: inline-flex; align-items: center;">
     {#each state.shuffled as person, i}
       {#if i !== 0}
