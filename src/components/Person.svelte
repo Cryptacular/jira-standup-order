@@ -26,7 +26,7 @@
         {name}
     </span>
     {#if hovering}
-        <span class="buttons">
+        <span class={"buttons" + (name.length <= 3 ? " buttons--short-name" : "")}>
             {#if isSkipped}
                 <button class="aui-button" on:click={onUnskip}><ShowIcon /></button>
             {/if}
@@ -64,6 +64,10 @@
         top: -17px;
         display: flex;
         flex-direction: column;
+    }
+
+    .buttons.buttons--short-name {
+        left: 0px;
     }
 
     button {

@@ -29,8 +29,8 @@
     e.preventDefault();
     state.attendees = [...state.attendees, inputValue.trim()]
     state.shuffled = [...state.shuffled, inputValue.trim()]
-    isEditing = false;
     inputValue = "";
+    inputField.focus();
   }
 
   function cancelEditMode() {
