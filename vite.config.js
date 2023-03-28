@@ -8,7 +8,7 @@ export default defineConfig({
   build: {
     lib: {
       name: "jiraStandupOrder",
-      entry: resolve(__dirname, "src/main.js"),
+      entry: resolve(__dirname, "src/main.ts"),
       fileName: "jiraStandupOrder",
     },
   },

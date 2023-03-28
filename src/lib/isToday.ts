@@ -1,4 +1,4 @@
-export const isToday = (dateString1) => {
+export const isToday = (dateString1: string | null): boolean => {
   if (!dateString1) {
     return false;
   }

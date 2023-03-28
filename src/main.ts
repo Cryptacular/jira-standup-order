@@ -2,21 +2,21 @@ import App from "./App.svelte";
 
 let hasInitialised = false;
 
-const isOnJiraBoard = () => {
+const isOnJiraBoard = (): boolean => {
   const regex = new RegExp(
     /^\/jira\/software\/c\/projects\/\w+\/boards\/\d+$/g
   );
   return regex.test(window.location.pathname);
 };
 
-const isPageReady = () => {
+const isPageReady = (): boolean => {
   const quickFiltersList = document.querySelector("#ghx-quick-filters > ul");
   return !!quickFiltersList;
 };
 
 const jiraStandupOrderContainerId = "jiraStandupOrderContainer";
 
-const init = () => {
+const init = (): void => {
   const quickFiltersList = document.querySelector("#ghx-quick-filters > ul");
   const listItem = document.createElement("li");
   listItem.id = jiraStandupOrderContainerId;
