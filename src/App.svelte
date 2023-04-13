@@ -27,8 +27,15 @@
    */
   function onSave(e) {
     e.preventDefault();
-    state.attendees = [...state.attendees, inputValue.trim()]
-    state.shuffled = [...state.shuffled, inputValue.trim()]
+    const trimmedValue = inputValue.trim();
+
+    if (!trimmedValue) {
+      inputField.focus();
+      return;
+    }
+
+    state.attendees = [...state.attendees, trimmedValue];
+    state.shuffled = [...state.shuffled, trimmedValue];
     inputValue = "";
     inputField.focus();
   }
