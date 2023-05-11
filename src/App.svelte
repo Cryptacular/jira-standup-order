@@ -158,8 +158,8 @@ function isCurrent(person) {
 
   {#if !isEditing}
     {#if state.shuffled.length > 0}
-      <button class="aui-button" on:click={onNextClick}><NextIcon /></button>
       <button class="aui-button" on:click={onPreviousClick}><PreviousIcon /></button>
+      <button class="aui-button" on:click={onNextClick}><NextIcon /></button>
       <button class="aui-button" on:click={shuffleAttendees}><ShuffleIcon /></button>
     {/if}
     <button class="aui-button" on:click={onAddClick}><PlusIcon /></button>
