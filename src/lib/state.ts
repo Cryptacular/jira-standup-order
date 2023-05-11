@@ -13,7 +13,19 @@ interface State {
  * @returns {State} state
  */
 export function getState(): State {
-  const savedState = JSON.parse(localStorage.getItem(localStorageKey)) as State;
+  const defaultState: State = {
+    attendees: [],
+    shuffled: [],
+    skipped: [],
+    currentAttendee: null,
+    lastShuffled: null,
+  };
+
+  const savedState: State = {
+    ...defaultState,
+    ...(JSON.parse(localStorage.getItem(localStorageKey)) || {}),
+  };
+
   savedState.attendees = savedState.attendees?.filter((a) => !!a.trim()) || [];
   savedState.shuffled = savedState.shuffled?.filter((a) => !!a.trim()) || [];
 
