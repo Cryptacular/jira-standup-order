@@ -1,6 +1,6 @@
 <script>
   import { shuffle } from "./lib/shuffle";
-  import { getState, setState } from "./lib/localStorage";
+  import { getState, setState } from "./lib/state";
   import { isToday } from "./lib/isToday";
   import Person from "./components/Person.svelte";
   import PlusIcon from "./icons/PlusIcon.svelte";
@@ -28,8 +28,15 @@
    */
   function onSave(e) {
     e.preventDefault();
-    state.attendees = [...state.attendees, inputValue.trim()]
-    state.shuffled = [...state.shuffled, inputValue.trim()]
+    const trimmedValue = inputValue.trim();
+
+    if (!trimmedValue) {
+      inputField.focus();
+      return;
+    }
+
+    state.attendees = [...state.attendees, trimmedValue];
+    state.shuffled = [...state.shuffled, trimmedValue];
     inputValue = "";
     inputField.focus();
   }
@@ -136,6 +143,10 @@ function isCurrent(person) {
 
 <div style="margin-top: -4px;">
   <span style="margin-right: 10px; display: inline-flex; align-items: center;">
+    {#if state.shuffled.length === 0}
+      <em>Standup order is empty</em>
+    {/if}
+
     {#each state.shuffled as person, i}
       {#if i !== 0}
         <ArrowRightIcon />
