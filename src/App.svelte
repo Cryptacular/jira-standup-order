@@ -9,6 +9,7 @@
   import CheckIcon from "./icons/CheckIcon.svelte";
   import CancelIcon from "./icons/CancelIcon.svelte";
   import NextIcon from "./icons/NextIcon.svelte";
+  import PreviousIcon from "./icons/PreviousIcon.svelte";
 
   let state = getState();
   $: setState(state);
@@ -81,6 +82,24 @@
     }
   }
 
+  function onPreviousClick() {
+    const unSkippedAttendees = state.shuffled.filter(s => !state.skipped.some(h => h === s));
+
+    if (state.currentAttendee === null) {
+      state.currentAttendee = unSkippedAttendees[unSkippedAttendees.length - 1];
+      return;
+    }
+
+    const currentIndex = unSkippedAttendees.indexOf(state.currentAttendee);
+    const previousIndex = currentIndex - 1;
+
+    if (previousIndex >= 0) {
+      state.currentAttendee = unSkippedAttendees[previousIndex];
+    } else {
+      state.currentAttendee = null;
+    }
+  }
+
   /**
    * @param {string} person
    */
@@ -139,6 +158,7 @@ function isCurrent(person) {
 
   {#if !isEditing}
     {#if state.shuffled.length > 0}
+      <button class="aui-button" on:click={onPreviousClick}><PreviousIcon /></button>
       <button class="aui-button" on:click={onNextClick}><NextIcon /></button>
       <button class="aui-button" on:click={shuffleAttendees}><ShuffleIcon /></button>
     {/if}
