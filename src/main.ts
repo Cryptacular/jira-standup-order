@@ -1,5 +1,6 @@
 import App from "./App.svelte";
 
+const isDev = import.meta.env.DEV;
 let hasInitialised = false;
 
 const isOnJiraBoard = (): boolean => {
@@ -23,18 +24,24 @@ const init = (): void => {
   quickFiltersList.appendChild(listItem);
 };
 
-setInterval(() => {
-  if (isOnJiraBoard()) {
-    if (isPageReady() && !hasInitialised) {
-      hasInitialised = true;
-      setTimeout(() => {
-        init();
-        new App({
-          target: document.getElementById(jiraStandupOrderContainerId),
-        });
-      }, 500);
+if (isDev) {
+  new App({
+    target: document.getElementById("app"),
+  });
+} else {
+  setInterval(() => {
+    if (isOnJiraBoard()) {
+      if (isPageReady() && !hasInitialised) {
+        hasInitialised = true;
+        setTimeout(() => {
+          init();
+          new App({
+            target: document.getElementById(jiraStandupOrderContainerId),
+          });
+        }, 500);
+      }
+    } else {
+      hasInitialised = false;
     }
-  } else {
-    hasInitialised = false;
-  }
-}, 500);
+  }, 500);
+}

@@ -4,10 +4,55 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + Svelte</title>
+    <title>JIRA Standup Order</title>
+    <style>
+      body {
+        font-family: sans-serif;
+      }
+    </style>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <div style="padding: 20px 0">
+      <div id="app"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+
+    <!-- Testing tools -->
+    <hr />
+    <div style="font-style: italic">
+      <p>Testing tools:</p>
+      <button onclick="clearLocalStorage()">Clear local storage</button>
+      <button onclick="setValidLocalStorage()">Set sample local storage</button>
+
+      <p>Current local storage:</p>
+      <pre id="currentLocalStorage"></pre>
+    </div>
+
+    <script>
+      const key = "jiraStandupOrder";
+
+      function clearLocalStorage() {
+        localStorage.removeItem(key);
+        window.location.reload();
+      }
+
+      function setValidLocalStorage() {
+        localStorage.setItem(
+          key,
+          JSON.stringify({ attendees: ["Bert", "Ernie", "Big Bird", "Elmo"] })
+        );
+        window.location.reload();
+      }
+
+      function getLocalStorage() {
+        const currentLocalStorage = localStorage.getItem(key);
+        document.getElementById("currentLocalStorage").innerText =
+          JSON.stringify(JSON.parse(currentLocalStorage), null, 2);
+      }
+
+      setInterval(() => {
+        getLocalStorage();
+      }, 500);
+    </script>
   </body>
 </html>
