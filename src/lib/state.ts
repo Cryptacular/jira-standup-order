@@ -1,6 +1,6 @@
-const localStorageKey = "jiraStandupOrder";
+export const localStorageKey = "jiraStandupOrder";
 
-interface State {
+export interface State {
   attendees: string[];
   shuffled: string[];
   skipped: string[];
