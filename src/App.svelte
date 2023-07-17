@@ -10,18 +10,27 @@
   import CancelIcon from "./icons/CancelIcon.svelte";
   import NextIcon from "./icons/NextIcon.svelte";
   import PreviousIcon from "./icons/PreviousIcon.svelte";
+  import { v4 } from "uuid";
 
   let state = getState();
   $: setState(state);
+  $: shuffledAttendeesViewModel = getShuffledAttendees(state);
   
   if (!isToday(state.lastShuffled)) {
+    state = {...state, attendees: state.attendees.map(a => ({...a, isSkipped: false})) }
     shuffleAttendees();
-    state.skipped = [];
   }
   
   let isEditing = state.attendees.length === 0;
   let inputField;
   let inputValue = "";
+
+  /**
+   * @param {import("./lib/state").State} state
+   */
+  function getShuffledAttendees(state) {
+    return state.shuffled.map(s => state.attendees.find(a => a.id === s));
+  }
 
   /**
    * @param {{ preventDefault: () => void; }} e
@@ -35,8 +44,14 @@
       return;
     }
 
-    state.attendees = [...state.attendees, trimmedValue];
-    state.shuffled = [...state.shuffled, trimmedValue];
+    const newAttendee = {id: v4(), name: trimmedValue, isSkipped: false};
+
+    state = {
+      ...state,
+      attendees: [...state.attendees, newAttendee],
+      shuffled: [...state.shuffled, newAttendee.id]
+    };
+
     inputValue = "";
     inputField.focus();
   }
@@ -52,10 +67,10 @@
     }
 
     const shuffled = shuffle(state.attendees);
-    const unskipped = shuffled.filter(s => !state.skipped.some(h => h === s));
-    state.shuffled = [...unskipped, ...state.skipped];
-    state.lastShuffled = new Date().toISOString();
-    state.currentAttendee = unskipped.length > 0 ? unskipped[0] : null;
+    const skipped = shuffled.filter(s => s.isSkipped).map(s => s.id);
+    const unskipped = shuffled.filter(s => !s.isSkipped).map(s => s.id);
+
+    state = {...state, shuffled: [...unskipped, ...skipped], lastShuffled: new Date().toISOString(), currentAttendee: unskipped.length > 0 ? 0 : null}
   }
 
   function onAddClick() {
@@ -66,79 +81,66 @@
   }
 
   function onNextClick() {
-    if (state.currentAttendee === null) {
-      state.currentAttendee = state.shuffled[0];
-      return;
+    const firstIndex = state.currentAttendee === null ? 0 : (state.currentAttendee + 1);
+
+    for (let i = firstIndex; i < state.shuffled.length; i++) {
+      const nextAttendee = state.attendees.find(x => x.id === state.shuffled[i]);
+
+      if (!nextAttendee.isSkipped) {
+        state = {...state, currentAttendee: i };
+        return;
+      }
     }
 
-    const unSkippedAttendees = state.shuffled.filter(s => !state.skipped.some(h => h === s));
-    const currentIndex = unSkippedAttendees.indexOf(state.currentAttendee);
-    const nextIndex = currentIndex + 1;
-
-    if (nextIndex < unSkippedAttendees.length) {
-      state.currentAttendee = unSkippedAttendees[nextIndex];
-    } else {
-      state.currentAttendee = null;
-    }
+    state = {...state, currentAttendee: null };
   }
 
   function onPreviousClick() {
-    const unSkippedAttendees = state.shuffled.filter(s => !state.skipped.some(h => h === s));
+    const firstIndex = state.currentAttendee === null ? state.shuffled.length - 1 : (state.currentAttendee - 1);
 
-    if (state.currentAttendee === null) {
-      state.currentAttendee = unSkippedAttendees[unSkippedAttendees.length - 1];
-      return;
+    for (let i = firstIndex; i >= 0; i--) {
+      const prevAttendee = state.attendees.find(x => x.id === state.shuffled[i]);
+
+      if (!prevAttendee.isSkipped) {
+        state.currentAttendee = i;
+        return;
+      }
     }
 
-    const currentIndex = unSkippedAttendees.indexOf(state.currentAttendee);
-    const previousIndex = currentIndex - 1;
-
-    if (previousIndex >= 0) {
-      state.currentAttendee = unSkippedAttendees[previousIndex];
-    } else {
-      state.currentAttendee = null;
-    }
+    state = {...state, currentAttendee: null };
   }
 
   /**
-   * @param {string} person
+   * @param {import("./lib/state").Id} id
    */
-  function handleSkip(person) {
-    if (!state.skipped?.some((/** @type {string} */ h) => h === person)) {
-      state.skipped = [...state.skipped, person]
-    }
-  }
-
-/**
- * @param {string} person
- */
-function handleUnskip(person) {
-  if (state.skipped?.some((/** @type {string} */ h) => h === person)) {
-    state.skipped = state.skipped.filter((/** @type {string} */ s) => s !== person)
-  }
-}
-
-  /**
-   * @param {string} person
-   */
-  function handleDelete(person) {
-    state.attendees = state.attendees.filter((/** @type {string} */ a) => a !== person);
-    state.shuffled = state.shuffled.filter((/** @type {string} */ a) => a !== person);
+  function handleSkip(id) {
+    state = {...state, attendees: state.attendees.map(a => a.id === id ? {...a, isSkipped: true} : a) };
   }
 
   /**
-   * @param {string} person
+   * @param {import("./lib/state").Id} id
    */
-  function isSkipped(person) {
-    return state.skipped ? state.skipped.some((/** @type {string} */ h) => h === person) : false;
+  function handleUnskip(id) {
+    state = {...state, attendees: state.attendees.map(a => a.id === id ? {...a, isSkipped: false} : a) };
   }
 
-/**
- * @param {string} person
- */
-function isCurrent(person) {
-  return state.currentAttendee === person;
-}
+  /**
+   * @param {import("./lib/state").Id} id
+   */
+  function handleDelete(id) {
+    state = {
+      ...state,
+      attendees: state.attendees.filter((a) => a.id !== id),
+      shuffled: state.shuffled.filter(s => s !== id)
+    };
+  }
+
+  /**
+   * @param {import("./lib/state").Id} id
+   */
+  function isCurrent(id) {
+    return state.shuffled[state.currentAttendee] === state.attendees.find(a => a.id === id)?.id
+  }
 </script>
 
 <div style="margin-top: -4px;">
@@ -147,12 +149,12 @@ function isCurrent(person) {
       <em>Standup order is empty</em>
     {/if}
 
-    {#each state.shuffled as person, i}
+    {#each shuffledAttendeesViewModel as person, i}
       {#if i !== 0}
         <ArrowRightIcon />
       {/if}
 
-      <Person name={person} isCurrent={isCurrent(person)} isSkipped={isSkipped(person)} onSkip={() => handleSkip(person)} onUnskip={() => handleUnskip(person)} onDelete={() => handleDelete(person)} />
+      <Person name={person.name} isCurrent={isCurrent(person.id)} isSkipped={person.isSkipped} onSkip={() => handleSkip(person.id)} onUnskip={() => handleUnskip(person.id)} onDelete={() => handleDelete(person.id)} />
     {/each}
   </span>
 
