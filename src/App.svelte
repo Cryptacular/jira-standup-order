@@ -1,6 +1,7 @@
 <script>
   import { onMount } from "svelte";
   import { v4, v5 } from "uuid";
+  import { Circle } from 'svelte-loading-spinners';
   import { shuffle } from "./lib/shuffle";
   import { getState, setState } from "./lib/state";
   import { isToday } from "./lib/isToday";
@@ -190,9 +191,9 @@
   }
 </script>
 
-<div style="margin-top: -4px;">
+<div class="jira-standup-container">
   {#if state !== null}
-    <span style="margin-right: 10px; display: inline-flex; align-items: center;">
+    <span style="display: inline-flex; align-items: center;">
       {#if state.shuffled.length === 0}
         <em>Standup order is empty</em>
       {/if}
@@ -206,14 +207,16 @@
       {/each}
     </span>
 
-    {#if !isEditing}
-      {#if state.shuffled.length > 0}
-        <button class="aui-button" on:click={onPreviousClick}><PreviousIcon /></button>
-        <button class="aui-button" on:click={onNextClick}><NextIcon /></button>
-        <button class="aui-button" on:click={shuffleAttendees}><ShuffleIcon /></button>
+    <div>
+      {#if !isEditing}
+        {#if state.shuffled.length > 0}
+          <button class="aui-button" on:click={onPreviousClick}><PreviousIcon /></button>
+          <button class="aui-button" on:click={onNextClick}><NextIcon /></button>
+          <button class="aui-button" on:click={shuffleAttendees}><ShuffleIcon /></button>
+        {/if}
+        <button class="aui-button" on:click={onAddClick}><PlusIcon /></button>
       {/if}
-      <button class="aui-button" on:click={onAddClick}><PlusIcon /></button>
-    {/if}
+    </div>
 
     {#if isEditing}
       <form on:submit={onSave}>
@@ -230,7 +233,7 @@
   {/if}
 
   {#if isLoading}
-    <span>Loading...</span>
+    <span class="spinner"><Circle size="20" color="#626F86" unit="px" duration="1s" /></span>
   {/if}
 </div>
 
@@ -246,6 +249,14 @@
     font-weight: 500;
   }
 
+  .jira-standup-container {
+    margin-top: -4px;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
   .input-field {
     padding: 8px 6px; 
     background-color: #FAFBFC;
@@ -256,5 +267,9 @@
     border-style: solid;
     margin-right: 10px;
     width: 50px;
+  }
+
+  .spinner {
+    display: flex;
   }
 </style>
