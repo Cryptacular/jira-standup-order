@@ -16,7 +16,6 @@ describe("state", () => {
         version: 2,
         attendees: [],
         shuffled: [],
-        currentAttendee: null,
         lastShuffled: null,
       };
 
@@ -45,7 +44,6 @@ describe("state", () => {
           { id: "2", name: "Ernie", isSkipped: true },
         ],
         shuffled: ["1", "2"],
-        currentAttendee: null,
         lastShuffled: null,
       };
 
@@ -66,7 +64,6 @@ describe("state", () => {
           { id: "3", name: "Grover", isSkipped: true },
         ],
         shuffled: ["Grover", "Big Bird", "Elmo"],
-        currentAttendee: 1,
         lastShuffled: new Date(2023, 5, 16, 12, 10, 0).toISOString(),
       };
 

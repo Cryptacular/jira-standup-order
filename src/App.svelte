@@ -23,6 +23,7 @@
   let inputValue = "";
   let isEditing = false
   let shouldSyncWithServerCheckbox = false;
+  let currentAttendee = null;
 
   onMount(async () => {
     const config = await getConfig();
@@ -104,7 +105,8 @@
     const skipped = shuffled.filter(s => s.isSkipped).map(s => s.id);
     const unskipped = shuffled.filter(s => !s.isSkipped).map(s => s.id);
 
-    state = {...state, shuffled: [...unskipped, ...skipped], lastShuffled: new Date().toISOString(), currentAttendee: unskipped.length > 0 ? 0 : null}
+    state = {...state, shuffled: [...unskipped, ...skipped], lastShuffled: new Date().toISOString()}
+    currentAttendee = unskipped.length > 0 ? 0 : null
   }
 
   function onAddClick() {
@@ -115,33 +117,36 @@
   }
 
   function onNextClick() {
-    const firstIndex = state.currentAttendee === null ? 0 : (state.currentAttendee + 1);
+    const firstIndex = currentAttendee === null ? 0 : (currentAttendee + 1);
 
     for (let i = firstIndex; i < state.shuffled.length; i++) {
       const nextAttendee = state.attendees.find(x => x.id === state.shuffled[i]);
 
       if (!nextAttendee.isSkipped) {
-        state = {...state, currentAttendee: i };
+        state = {...state };
+        currentAttendee = i
         return;
       }
     }
 
-    state = {...state, currentAttendee: null };
+    state = {...state };
+    currentAttendee = null;
   }
 
   function onPreviousClick() {
-    const firstIndex = state.currentAttendee === null ? state.shuffled.length - 1 : (state.currentAttendee - 1);
+    const firstIndex = currentAttendee === null ? state.shuffled.length - 1 : (currentAttendee - 1);
 
     for (let i = firstIndex; i >= 0; i--) {
       const prevAttendee = state.attendees.find(x => x.id === state.shuffled[i]);
 
       if (!prevAttendee.isSkipped) {
-        state.currentAttendee = i;
+        currentAttendee = i;
         return;
       }
     }
 
-    state = {...state, currentAttendee: null };
+    state = {...state };
+    currentAttendee = null;
   }
 
   /**
@@ -173,7 +178,7 @@
    * @param {import("./models/Id").default} id
    */
   function isCurrent(id) {
-    return state.shuffled[state.currentAttendee] === state.attendees.find(a => a.id === id)?.id
+    return state.shuffled[currentAttendee] === state.attendees.find(a => a.id === id)?.id
   }
 
   function getId() {

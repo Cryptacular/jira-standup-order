@@ -9,7 +9,6 @@ export const defaultState: StateV2 = {
   version: 2,
   attendees: [],
   shuffled: [],
-  currentAttendee: null,
   lastShuffled: null,
 };
 
@@ -52,8 +51,8 @@ export async function getState(
     delete savedState["skipped"];
   }
 
-  if (typeof savedState.currentAttendee !== "number") {
-    savedState.currentAttendee = null;
+  if (savedState["currentAttendee"]) {
+    delete savedState["currentAttendee"];
   }
 
   savedState.attendees =
