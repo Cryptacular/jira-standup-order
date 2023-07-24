@@ -1,37 +1,33 @@
 import { v4 } from "uuid";
+import { getLocalStorageService } from "./storage/localStorageService";
+import { databaseService } from "./storage/databaseService";
+import type Attendee from "src/models/Attendee";
+import type Id from "src/models/Id";
+import type StateV2 from "src/models/StateV2";
 
-export const localStorageKey = "jiraStandupOrder";
-
-export interface Attendee {
-  id: Id;
-  name: string;
-  isSkipped: boolean;
-}
-
-export interface Id extends String {}
-
-export interface State {
-  attendees: Attendee[];
-  shuffled: Id[];
-  currentAttendee: number | null;
-  lastShuffled: string | null;
-}
+export const defaultState: StateV2 = {
+  version: 2,
+  attendees: [],
+  shuffled: [],
+  currentAttendee: null,
+  lastShuffled: null,
+};
 
 /**
  *
- * @returns {State} state
+ * @returns {StateV2} state
  */
-export function getState(): State {
-  const defaultState: State = {
-    attendees: [],
-    shuffled: [],
-    currentAttendee: null,
-    lastShuffled: null,
-  };
+export async function getState(
+  id: Id,
+  shouldSyncWithServer: boolean
+): Promise<StateV2> {
+  const storageService = shouldSyncWithServer
+    ? databaseService
+    : getLocalStorageService<StateV2>();
 
-  const savedState: State = {
+  const savedState: StateV2 = {
     ...defaultState,
-    ...(JSON.parse(localStorage.getItem(localStorageKey)) || {}),
+    ...((await storageService.get(id)) || {}),
   };
 
   if (
@@ -63,19 +59,20 @@ export function getState(): State {
   savedState.attendees =
     savedState.attendees?.map((a) => ({ ...a, name: a.name.trim() })) || [];
 
-  const initialState: State = {
-    attendees: [],
-    shuffled: [],
-    currentAttendee: null,
-    lastShuffled: null,
-  };
-
-  return savedState ? { ...initialState, ...savedState } : initialState;
+  return savedState;
 }
 
 /**
- * @param {State} state
+ * @param {Id} id
+ * @param {StateV2} state
  */
-export function setState(state: State): void {
-  localStorage.setItem(localStorageKey, JSON.stringify(state));
+export async function setState(
+  id: Id,
+  state: StateV2,
+  shouldSyncWithServer?: boolean
+): Promise<void> {
+  const storageService = shouldSyncWithServer
+    ? databaseService
+    : getLocalStorageService<StateV2>();
+  await storageService.set(id, state);
 }

@@ -29,10 +29,18 @@
 
       <p>Current local storage:</p>
       <pre id="currentLocalStorage"></pre>
+      <p>Current config:</p>
+      <pre id="currentConfig"></pre>
     </div>
 
     <script>
-      const key = "jiraStandupOrder";
+      if (window.location.pathname === "/") {
+        navigation.navigate("/TEST/boards/123");
+      }
+
+      const prefix = "jiraStandupOrder";
+      const id = "9af6f43c-08f3-5a42-bdeb-a863b5c42247";
+      const key = `${prefix}-${id}`;
 
       function clearLocalStorage() {
         localStorage.removeItem(key);
@@ -86,15 +94,30 @@
         return currentLocalStorage;
       }
 
+      function getConfig() {
+        return localStorage.getItem(`${prefix}-config`);
+      }
+
       let localStorageCache = "";
+      let configCache = "";
 
       setInterval(() => {
         const currentLocalStorage = getLocalStorage();
+        const currentConfig = getConfig();
 
         if (currentLocalStorage !== localStorageCache) {
           document.getElementById("currentLocalStorage").innerText =
             JSON.stringify(JSON.parse(currentLocalStorage), null, 2);
           localStorageCache = currentLocalStorage;
+        }
+
+        if (currentConfig !== configCache) {
+          document.getElementById("currentConfig").innerText = JSON.stringify(
+            JSON.parse(currentConfig),
+            null,
+            2
+          );
+          configCache = currentConfig;
         }
       }, 200);
     </script>

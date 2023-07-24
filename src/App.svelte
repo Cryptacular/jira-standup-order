@@ -1,4 +1,6 @@
 <script>
+  import { onMount } from "svelte";
+  import { v4, v5 } from "uuid";
   import { shuffle } from "./lib/shuffle";
   import { getState, setState } from "./lib/state";
   import { isToday } from "./lib/isToday";
@@ -10,23 +12,54 @@
   import CancelIcon from "./icons/CancelIcon.svelte";
   import NextIcon from "./icons/NextIcon.svelte";
   import PreviousIcon from "./icons/PreviousIcon.svelte";
-  import { v4 } from "uuid";
+  import { getConfig, setConfig } from "./lib/config";
 
-  let state = getState();
-  $: setState(state);
-  $: shuffledAttendeesViewModel = getShuffledAttendees(state);
-  
-  if (!isToday(state.lastShuffled)) {
-    state = {...state, attendees: state.attendees.map(a => ({...a, isSkipped: false})) }
-    shuffleAttendees();
-  }
-  
-  let isEditing = state.attendees.length === 0;
+  const id = getId();
+  let isLoading = true;
+  let state = null
+  let shuffledAttendeesViewModel = null;
   let inputField;
   let inputValue = "";
+  let isEditing = false
+  let shouldSyncWithServerCheckbox = false;
+
+  onMount(async () => {
+    const config = await getConfig();
+    const loadedState = await getState(id, config.shouldSyncWithServer);
+    
+    shouldSyncWithServerCheckbox = config.shouldSyncWithServer;
+    state = loadedState;
+
+    if (!isToday(state?.lastShuffled)) {
+      state = {...state, attendees: state?.attendees.map(a => ({...a, isSkipped: false})) }
+      shuffleAttendees();
+    }
+
+    isEditing = state?.attendees?.length === 0;
+    isLoading = false;
+  });
+
+  $: {
+    (async () => {
+      const config = await getConfig();
+      
+      if (shouldSyncWithServerCheckbox !== config.shouldSyncWithServer && !isLoading) {
+        isLoading = true;
+        state = await getState(id, shouldSyncWithServerCheckbox);
+        isLoading = false;
+      }
+
+      await setConfig({...config, shouldSyncWithServer: shouldSyncWithServerCheckbox})
+    })()
+  }
+  
+  $: if (state) {
+    shuffledAttendeesViewModel = getShuffledAttendees(state);
+    setState(id, state, shouldSyncWithServerCheckbox)
+  }
 
   /**
-   * @param {import("./lib/state").State} state
+   * @param {import("./models/StateV2").default} state
    */
   function getShuffledAttendees(state) {
     return state.shuffled.map(s => state.attendees.find(a => a.id === s));
@@ -62,7 +95,7 @@
   }
 
   function shuffleAttendees() {
-    if (state.attendees.length === 0) {
+    if (!state?.attendees || state.attendees.length === 0) {
       return;
     }
 
@@ -111,21 +144,21 @@
   }
 
   /**
-   * @param {import("./lib/state").Id} id
+   * @param {import("./models/Id").default} id
    */
   function handleSkip(id) {
     state = {...state, attendees: state.attendees.map(a => a.id === id ? {...a, isSkipped: true} : a) };
   }
 
   /**
-   * @param {import("./lib/state").Id} id
+   * @param {import("./models/Id").default} id
    */
   function handleUnskip(id) {
     state = {...state, attendees: state.attendees.map(a => a.id === id ? {...a, isSkipped: false} : a) };
   }
 
   /**
-   * @param {import("./lib/state").Id} id
+   * @param {import("./models/Id").default} id
    */
   function handleDelete(id) {
     state = {
@@ -136,43 +169,68 @@
   }
 
   /**
-   * @param {import("./lib/state").Id} id
+   * @param {import("./models/Id").default} id
    */
   function isCurrent(id) {
     return state.shuffled[state.currentAttendee] === state.attendees.find(a => a.id === id)?.id
   }
+
+  function getId() {
+    const pathSegments = window.location.pathname.split("/");
+    const boardsIndex = pathSegments.indexOf("boards");
+
+    if (boardsIndex <= 0) {
+      throw new Error("Unexpected JIRA URL");
+    }
+
+    const jiraProject = pathSegments[boardsIndex - 1];
+    const jiraBoard = pathSegments[boardsIndex + 1];
+
+    return v5(`${jiraProject}/${jiraBoard}`, "e5241f0e-bab5-4d37-a9a1-20bd464766cb");
+  }
 </script>
 
 <div style="margin-top: -4px;">
-  <span style="margin-right: 10px; display: inline-flex; align-items: center;">
-    {#if state.shuffled.length === 0}
-      <em>Standup order is empty</em>
-    {/if}
-
-    {#each shuffledAttendeesViewModel as person, i}
-      {#if i !== 0}
-        <ArrowRightIcon />
+  {#if state !== null}
+    <span style="margin-right: 10px; display: inline-flex; align-items: center;">
+      {#if state.shuffled.length === 0}
+        <em>Standup order is empty</em>
       {/if}
 
-      <Person name={person.name} isCurrent={isCurrent(person.id)} isSkipped={person.isSkipped} onSkip={() => handleSkip(person.id)} onUnskip={() => handleUnskip(person.id)} onDelete={() => handleDelete(person.id)} />
-    {/each}
-  </span>
+      {#each shuffledAttendeesViewModel as person, i}
+        {#if i !== 0}
+          <ArrowRightIcon />
+        {/if}
 
-  {#if !isEditing}
-    {#if state.shuffled.length > 0}
-      <button class="aui-button" on:click={onPreviousClick}><PreviousIcon /></button>
-      <button class="aui-button" on:click={onNextClick}><NextIcon /></button>
-      <button class="aui-button" on:click={shuffleAttendees}><ShuffleIcon /></button>
+        <Person name={person.name} isCurrent={isCurrent(person.id)} isSkipped={person.isSkipped} onSkip={() => handleSkip(person.id)} onUnskip={() => handleUnskip(person.id)} onDelete={() => handleDelete(person.id)} />
+      {/each}
+    </span>
+
+    {#if !isEditing}
+      {#if state.shuffled.length > 0}
+        <button class="aui-button" on:click={onPreviousClick}><PreviousIcon /></button>
+        <button class="aui-button" on:click={onNextClick}><NextIcon /></button>
+        <button class="aui-button" on:click={shuffleAttendees}><ShuffleIcon /></button>
+      {/if}
+      <button class="aui-button" on:click={onAddClick}><PlusIcon /></button>
     {/if}
-    <button class="aui-button" on:click={onAddClick}><PlusIcon /></button>
+
+    {#if isEditing}
+      <form on:submit={onSave}>
+        <input class="input-field" placeholder="Name" bind:this={inputField} bind:value={inputValue} style="margin-right: 10px;" />
+        <button class="aui-button" type="submit"><CheckIcon /></button>
+        <button class="aui-button" on:click={cancelEditMode}><CancelIcon /></button>
+      </form>
+    {/if}
+
+    <input bind:checked={shouldSyncWithServerCheckbox} type="checkbox" id="shouldSync"/>
+    <label for="shouldSync">
+      Sync?
+    </label>
   {/if}
 
-  {#if isEditing}
-    <form on:submit={onSave}>
-      <input placeholder="Name" bind:this={inputField} bind:value={inputValue} style="margin-right: 10px;" />
-      <button class="aui-button" type="submit"><CheckIcon /></button>
-      <button class="aui-button" on:click={cancelEditMode}><CancelIcon /></button>
-    </form>
+  {#if isLoading}
+    <span>Loading...</span>
   {/if}
 </div>
 
@@ -188,7 +246,7 @@
     font-weight: 500;
   }
 
-  input {
+  .input-field {
     padding: 8px 6px; 
     background-color: #FAFBFC;
     border-color: #DFE1E6;
