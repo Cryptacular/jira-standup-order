@@ -9,7 +9,7 @@ const channels: { [key: string]: RealtimeChannel } = {};
 const getChannel = (() => {
   const client = createClient(
     "https://dokkqfbdmbsbnsataxti.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRva2txZmJkbWJzYm5zYXRheHRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODk1NjM0OTQsImV4cCI6MjAwNTEzOTQ5NH0.tdv1IIpBYI-iuHH9K64Vno5r-MjR1EXEztCndhbB20c"
+    import.meta.env.VITE_SUPABASE_ANON_KEY
   );
 
   return (projectId: string) => {

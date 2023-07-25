@@ -223,7 +223,6 @@
   }
 
   async function subscribeToChanges() {
-    console.log("Subscribing...")
     if (!projectId)
       return;
 
@@ -242,7 +241,6 @@
   }
 
   async function unsubscribeFromChanges() {
-    console.log("Unsubscribing...")
     if (!projectId)
       return;
 
