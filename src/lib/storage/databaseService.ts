@@ -9,8 +9,6 @@ export const databaseService: StorageService<StateV2> = {
         mode: "cors",
         method: "GET",
         headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRva2txZmJkbWJzYm5zYXRheHRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODk1NjM0OTQsImV4cCI6MjAwNTEzOTQ5NH0.tdv1IIpBYI-iuHH9K64Vno5r-MjR1EXEztCndhbB20c",
           Accept: "application/json",
           "Content-Type": "application/json",
         },
@@ -37,8 +35,6 @@ export const databaseService: StorageService<StateV2> = {
         mode: "cors",
         method: "POST",
         headers: {
-          Authorization:
-            "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRva2txZmJkbWJzYm5zYXRheHRpIiwicm9sZSI6ImFub24iLCJpYXQiOjE2ODk1NjM0OTQsImV4cCI6MjAwNTEzOTQ5NH0.tdv1IIpBYI-iuHH9K64Vno5r-MjR1EXEztCndhbB20c",
           Accept: "application/json",
           "Content-Type": "application/json",
         },
