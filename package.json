@@ -11,8 +11,15 @@
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.0.2",
+    "supabase": "^1.77.9",
     "svelte": "^3.49.0",
+    "svelte-loading-spinners": "^0.3.4",
     "vite": "^3.1.0",
     "vitest": "^0.31.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.26.0",
+    "@types/uuid": "^9.0.2",
+    "uuid": "^9.0.0"
   }
 }

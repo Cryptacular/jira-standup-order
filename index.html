@@ -23,13 +23,24 @@
       <p>Testing tools:</p>
       <button onclick="clearLocalStorage()">Clear local storage</button>
       <button onclick="setValidLocalStorage()">Set sample local storage</button>
+      <button onclick="setLegacyLocalStorageV1()">
+        Set legacy local storage (v1)
+      </button>
 
       <p>Current local storage:</p>
       <pre id="currentLocalStorage"></pre>
+      <p>Current config:</p>
+      <pre id="currentConfig"></pre>
     </div>
 
     <script>
-      const key = "jiraStandupOrder";
+      if (window.location.pathname === "/") {
+        navigation.navigate("/TEST/boards/123");
+      }
+
+      const prefix = "jiraStandupOrder";
+      const id = "9af6f43c-08f3-5a42-bdeb-a863b5c42247";
+      const key = `${prefix}-${id}`;
 
       function clearLocalStorage() {
         localStorage.removeItem(key);
@@ -39,20 +50,76 @@
       function setValidLocalStorage() {
         localStorage.setItem(
           key,
-          JSON.stringify({ attendees: ["Bert", "Ernie", "Big Bird", "Elmo"] })
+          JSON.stringify({
+            attendees: [
+              {
+                id: "2e0486e9-8dab-4d5f-b1cc-e4c798123abb",
+                name: "Bert",
+                isSkipped: false,
+              },
+              {
+                id: "e27c0bd2-6ff1-4285-983c-d16a6633abb0",
+                name: "Ernie",
+                isSkipped: false,
+              },
+              {
+                id: "af85ee36-ca33-4b44-a26b-8ba5e9651abe",
+                name: "Big Bird",
+                isSkipped: false,
+              },
+              {
+                id: "12a1fc7b-159d-4dac-8edd-b0e5c7d3c4f6",
+                name: "Elmo",
+                isSkipped: false,
+              },
+            ],
+          })
+        );
+        window.location.reload();
+      }
+
+      function setLegacyLocalStorageV1() {
+        localStorage.setItem(
+          key,
+          JSON.stringify({
+            attendees: ["Bert", "Ernie", "Big Bird", "Elmo"],
+            shuffled: ["Ernie", "Big Bird", "Elmo", "Bert"],
+          })
         );
         window.location.reload();
       }
 
       function getLocalStorage() {
         const currentLocalStorage = localStorage.getItem(key);
-        document.getElementById("currentLocalStorage").innerText =
-          JSON.stringify(JSON.parse(currentLocalStorage), null, 2);
+        return currentLocalStorage;
       }
 
+      function getConfig() {
+        return localStorage.getItem(`${prefix}-config`);
+      }
+
+      let localStorageCache = "";
+      let configCache = "";
+
       setInterval(() => {
-        getLocalStorage();
-      }, 500);
+        const currentLocalStorage = getLocalStorage();
+        const currentConfig = getConfig();
+
+        if (currentLocalStorage !== localStorageCache) {
+          document.getElementById("currentLocalStorage").innerText =
+            JSON.stringify(JSON.parse(currentLocalStorage), null, 2);
+          localStorageCache = currentLocalStorage;
+        }
+
+        if (currentConfig !== configCache) {
+          document.getElementById("currentConfig").innerText = JSON.stringify(
+            JSON.parse(currentConfig),
+            null,
+            2
+          );
+          configCache = currentConfig;
+        }
+      }, 200);
     </script>
   </body>
 </html>
