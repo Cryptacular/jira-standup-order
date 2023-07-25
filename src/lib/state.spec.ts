@@ -13,7 +13,7 @@ describe("state", () => {
   describe("getState()", () => {
     it("returns default state if none exists in local storage", async () => {
       const expected: StateV2 = {
-        version: 2,
+        version: "2",
         attendees: [],
         shuffled: [],
         lastShuffled: null,
@@ -38,7 +38,7 @@ describe("state", () => {
       );
 
       const expected: StateV2 = {
-        version: 2,
+        version: "2",
         attendees: [
           { id: "1", name: "Bert", isSkipped: false },
           { id: "2", name: "Ernie", isSkipped: true },
@@ -57,7 +57,7 @@ describe("state", () => {
     it("saves state to local storage", async () => {
       const id = "123";
       const state: StateV2 = {
-        version: 2,
+        version: "2",
         attendees: [
           { id: "1", name: "Big Bird", isSkipped: false },
           { id: "2", name: "Elmo", isSkipped: false },

@@ -6,7 +6,7 @@ import type Id from "src/models/Id";
 import type StateV2 from "src/models/StateV2";
 
 export const defaultState: StateV2 = {
-  version: 2,
+  version: "2",
   attendees: [],
   shuffled: [],
   lastShuffled: null,
