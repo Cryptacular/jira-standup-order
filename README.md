@@ -8,4 +8,4 @@ This Chrome extension is available on the [Chrome Web Store](https://chrome.goog
 
 ## Development
 
-This extension is built using Svelte and Vite. Use the command `npm run build` to create a production build in the `dist` folder.
+This extension is built using Svelte and Vite. Use the command `npm run dev` to open a test page in your browser. Use the command `npm run build` to create a production build in the `dist` folder.
