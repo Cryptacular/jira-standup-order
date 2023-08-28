@@ -250,7 +250,7 @@
 
 <div class="jira-standup-container">
   {#if state !== null}
-    <span style="display: inline-flex; align-items: center;">
+    <span class="jira-standup-attendees">
       {#if shuffledAttendeesViewModel.length === 0}
         <em>Standup order is empty</em>
       {/if}
@@ -321,6 +321,11 @@
     flex-wrap: wrap;
     align-items: center;
     gap: 10px;
+  }
+
+  .jira-standup-attendees {
+    align-items: center;
+    white-space: normal;
   }
 
   .input-field {

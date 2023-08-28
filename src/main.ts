@@ -10,18 +10,24 @@ const isOnJiraBoard = (): boolean => {
   return regex.test(window.location.pathname);
 };
 
+const getQuickFiltersList = () =>
+  document.querySelector("#ghx-quick-filters > ul") ??
+  document.querySelector(
+    "[data-test-id='software-filters.ui.list-filter-container']"
+  );
+
 const isPageReady = (): boolean => {
-  const quickFiltersList = document.querySelector("#ghx-quick-filters > ul");
+  const quickFiltersList = getQuickFiltersList();
   return !!quickFiltersList;
 };
 
 const jiraStandupOrderContainerId = "jiraStandupOrderContainer";
 
 const init = (): void => {
-  const quickFiltersList = document.querySelector("#ghx-quick-filters > ul");
-  const listItem = document.createElement("li");
-  listItem.id = jiraStandupOrderContainerId;
-  quickFiltersList.appendChild(listItem);
+  const quickFiltersList = getQuickFiltersList();
+  const container = document.createElement("div");
+  container.id = jiraStandupOrderContainerId;
+  quickFiltersList.appendChild(container);
 };
 
 if (isDev) {
