@@ -1,7 +1,6 @@
 <script>
   import { onDestroy, onMount } from "svelte";
   import { v4, v5 } from "uuid";
-  import { Circle } from 'svelte-loading-spinners';
   import { shuffle } from "./lib/shuffle";
   import { getState, setState } from "./lib/state";
   import { isToday } from "./lib/isToday";
@@ -15,6 +14,7 @@
   import PreviousIcon from "./icons/PreviousIcon.svelte";
   import { getConfig, setConfig } from "./lib/config";
   import { subscribe, trackCurrentAttendee, trackStateChanged, unsubscribe } from "./lib/realtime/broadcast";
+  import Spinner from "./components/Spinner.svelte";
 
   const projectId = getId();
   let isLoading = true;
@@ -24,6 +24,7 @@
   let inputValue = "";
   let isEditing = false
   let shouldSyncWithServerCheckbox = false;
+  let isShuffleDisabled = false;
   let currentAttendee = null;
 
   onMount(async () => {
@@ -173,6 +174,14 @@
     trackCurrentAttendee(projectId, currentAttendee);
   }
 
+  function onShuffleClick() {
+    shuffleAttendees();
+    isShuffleDisabled = true;
+    setTimeout(() => {
+      isShuffleDisabled = false;
+    }, 500);
+  }
+
   /**
    * @param {import("./models/Id").default} userId
    */
@@ -269,7 +278,7 @@
         {#if state.shuffled.length > 0}
           <button class="aui-button" on:click={onPreviousClick}><PreviousIcon /></button>
           <button class="aui-button" on:click={onNextClick}><NextIcon /></button>
-          <button class="aui-button" on:click={shuffleAttendees}><ShuffleIcon /></button>
+          <button class="aui-button" on:click={onShuffleClick} disabled={isShuffleDisabled}><ShuffleIcon /></button>
         {/if}
         <button class="aui-button" on:click={onAddClick}><PlusIcon /></button>
       {/if}
@@ -292,7 +301,7 @@
   {/if}
 
   {#if isLoading}
-    <span class="jira-standup-spinner"><Circle size="20" color="#626F86" unit="px" duration="1s" /></span>
+    <Spinner />
   {/if}
 </div>
 
