@@ -25,6 +25,8 @@ const jiraStandupOrderContainerId = "jiraStandupOrderContainer";
 
 const init = (): void => {
   const quickFiltersList = getQuickFiltersList();
+  quickFiltersList.classList.add("jira-standup-parent-container");
+
   const container = document.createElement("div");
   container.id = jiraStandupOrderContainerId;
   quickFiltersList.appendChild(container);
