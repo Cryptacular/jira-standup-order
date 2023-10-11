@@ -13,7 +13,7 @@ const isOnJiraBoard = (): boolean => {
 const getQuickFiltersList = () =>
   document.querySelector("#ghx-quick-filters > ul") ??
   document.querySelector(
-    "[data-test-id='software-filters.ui.list-filter-container']"
+    "[data-testid='software-filters.ui.list-filter-container']"
   );
 
 const isPageReady = (): boolean => {
