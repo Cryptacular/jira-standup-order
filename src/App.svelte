@@ -175,6 +175,12 @@
   }
 
   function onShuffleClick() {
+    if (currentAttendee > 0) {
+      const shouldShuffle = confirm("Are you sure you want to shuffle?");
+      if (!shouldShuffle)
+        return;
+    }
+
     shuffleAttendees();
     isShuffleDisabled = true;
     setTimeout(() => {
