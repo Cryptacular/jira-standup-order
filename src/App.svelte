@@ -193,6 +193,7 @@
    */
   function handleSkip(userId) {
     state = {...state, attendees: state.attendees.map(a => a.id === userId ? {...a, isSkipped: true} : a) };
+    state.shuffled.push(state.shuffled.splice(state.shuffled.indexOf(userId), 1)[0]);
     trackStateChanged(projectId);
   }
 
@@ -201,6 +202,14 @@
    */
   function handleUnskip(userId) {
     state = {...state, attendees: state.attendees.map(a => a.id === userId ? {...a, isSkipped: false} : a) };
+    
+    const currIndex = state.shuffled.indexOf(userId);
+    const newIndex = state.shuffled.findIndex((sid) => { return state.attendees.find(a => a.id === sid && a.isSkipped) !== undefined });
+
+    if (newIndex !== currIndex + 1) {
+      state.shuffled.splice(newIndex < 0 ? state.shuffled.length - 1 : newIndex, 0, state.shuffled.splice(currIndex, 1)[0]);
+    }
+
     trackStateChanged(projectId);
   }
 
