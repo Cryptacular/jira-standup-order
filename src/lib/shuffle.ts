@@ -1,4 +1,6 @@
-export const shuffle = <T>(array: T[]): T[] => {
+import { sample } from "underscore";
+
+export const shuffleV1 = <T>(array: T[]): T[] => {
   const out = [...array];
 
   let currentIndex = out.length,
@@ -18,4 +20,8 @@ export const shuffle = <T>(array: T[]): T[] => {
   }
 
   return out;
+};
+
+export const shuffleV2 = <T>(input: T[]): T[] => {
+  return sample(input, Infinity);
 };
