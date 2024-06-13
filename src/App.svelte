@@ -449,15 +449,4 @@
     margin-right: 10px;
     width: 50px;
   }
-
-  .jira-standup-sync {
-    display: flex;
-    align-items: center;
-    flex-wrap: nowrap;
-    gap: 8px;
-  }
-
-  .jira-standup-spinner {
-    display: flex;
-  }
 </style>
