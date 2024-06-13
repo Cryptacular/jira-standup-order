@@ -9,3 +9,7 @@ This Chrome extension is available on the [Chrome Web Store](https://chrome.goog
 ## Development
 
 This extension is built using Svelte and Vite. Use the command `npm run dev` to open a test page in your browser. Use the command `npm run build` to create a production build in the `dist` folder.
+
+## Icons
+
+Icons are from the [react-icons](https://react-icons.github.io/react-icons/) project;

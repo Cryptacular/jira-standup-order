@@ -12,6 +12,8 @@
   import CancelIcon from "./icons/CancelIcon.svelte";
   import NextIcon from "./icons/NextIcon.svelte";
   import PreviousIcon from "./icons/PreviousIcon.svelte";
+  import HideIcon from "./icons/HideIcon.svelte";
+  import CogIcon from "./icons/CogIcon.svelte";
   import { getConfig, setConfig } from "./lib/config";
   import {
     subscribe,
@@ -20,6 +22,7 @@
     unsubscribe,
   } from "./lib/realtime/broadcast";
   import Spinner from "./components/Spinner.svelte";
+  import ShowIcon from "./icons/ShowIcon.svelte";
 
   const projectId = getId();
   let isLoading = true;
@@ -28,6 +31,7 @@
   let inputField;
   let inputValue = "";
   let isEditing = false;
+  let isExpanded = false;
   let shouldSyncWithServerCheckbox = false;
   let isShuffleDisabled = false;
   let currentAttendee = null;
@@ -318,33 +322,42 @@
 
     await unsubscribe(projectId);
   }
+
+  function onShowHideClick() {
+    isExpanded = !isExpanded;
+  }
 </script>
 
 <div class="jira-standup-container">
-  {#if state !== null}
-    <span class="jira-standup-attendees">
-      {#if shuffledAttendeesViewModel.length === 0}
-        <em>Standup order is empty</em>
-      {/if}
+  {#if !isExpanded}
+    🕴️ Jira Standup Order
+    <button class="aui-button" on:click={onShowHideClick}><ShowIcon /></button>
+  {/if}
 
-      {#each shuffledAttendeesViewModel as person, i}
-        {#if i !== 0}
-          <ArrowRightIcon />
+  {#if isExpanded}
+    {#if state !== null}
+      <span class="jira-standup-attendees">
+        {#if shuffledAttendeesViewModel.length === 0}
+          <em>Standup order is empty</em>
         {/if}
 
-        <Person
-          name={person.name}
-          isCurrent={isCurrent(person.id)}
-          isSkipped={person.isSkipped}
-          onSkip={() => handleSkip(person.id)}
-          onUnskip={() => handleUnskip(person.id)}
-          onDelete={() => handleDelete(person.id)}
-        />
-      {/each}
-    </span>
+        {#each shuffledAttendeesViewModel as person, i}
+          {#if i !== 0}
+            <ArrowRightIcon />
+          {/if}
 
-    <div>
-      {#if !isEditing}
+          <Person
+            name={person.name}
+            isCurrent={isCurrent(person.id)}
+            isSkipped={person.isSkipped}
+            onSkip={() => handleSkip(person.id)}
+            onUnskip={() => handleUnskip(person.id)}
+            onDelete={() => handleDelete(person.id)}
+          />
+        {/each}
+      </span>
+
+      <div>
         {#if state.shuffled.length > 0}
           <button class="aui-button" on:click={onPreviousClick}
             ><PreviousIcon /></button
@@ -357,37 +370,44 @@
             disabled={isShuffleDisabled}><ShuffleIcon /></button
           >
         {/if}
-        <button class="aui-button" on:click={onAddClick}><PlusIcon /></button>
-      {/if}
-    </div>
-
-    {#if isEditing}
-      <form on:submit={onSave} class="jira-standup-form">
-        <input
-          class="input-field"
-          placeholder="Name"
-          bind:this={inputField}
-          bind:value={inputValue}
-        />
-        <button class="aui-button" type="submit"><CheckIcon /></button>
-        <button class="aui-button" on:click={cancelEditMode}
-          ><CancelIcon /></button
+        <button
+          class="aui-button"
+          on:click={isEditing ? cancelEditMode : onAddClick}><CogIcon /></button
         >
-      </form>
+
+        <button class="aui-button" on:click={onShowHideClick}
+          ><HideIcon /></button
+        >
+      </div>
+
+      {#if isEditing}
+        <form on:submit={onSave} class="jira-standup-form">
+          <input
+            class="input-field"
+            placeholder="Name"
+            bind:this={inputField}
+            bind:value={inputValue}
+          />
+          <button class="aui-button" type="submit"><CheckIcon /></button>
+          <button class="aui-button" on:click={cancelEditMode}
+            ><CancelIcon /></button
+          >
+        </form>
+      {/if}
+
+      <div class="jira-standup-sync">
+        <input
+          bind:checked={shouldSyncWithServerCheckbox}
+          type="checkbox"
+          id="shouldSync"
+        />
+        <label for="shouldSync"> Sync? </label>
+      </div>
     {/if}
 
-    <div class="jira-standup-sync">
-      <input
-        bind:checked={shouldSyncWithServerCheckbox}
-        type="checkbox"
-        id="shouldSync"
-      />
-      <label for="shouldSync"> Sync? </label>
-    </div>
-  {/if}
-
-  {#if isLoading}
-    <Spinner />
+    {#if isLoading}
+      <Spinner />
+    {/if}
   {/if}
 </div>
 
@@ -397,6 +417,9 @@
     align-items: center;
     gap: 10px;
     margin: 0;
+    background: rgb(247, 248, 249);
+    padding: 4px 8px;
+    border-radius: 3px;
   }
 
   .jira-standup-form input,
