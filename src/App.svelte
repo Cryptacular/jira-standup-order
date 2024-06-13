@@ -32,7 +32,7 @@
   let inputValue = "";
   let isEditing = false;
   let isExpanded = false;
-  let shouldSyncWithServerCheckbox = false;
+  let shouldSyncWithServer = false;
   let isShuffleDisabled = false;
   let currentAttendee = null;
 
@@ -40,7 +40,7 @@
     const config = await getConfig();
     const loadedState = await getState(projectId, config.shouldSyncWithServer);
 
-    shouldSyncWithServerCheckbox = config.shouldSyncWithServer;
+    shouldSyncWithServer = config.shouldSyncWithServer;
     state = loadedState;
 
     if (!isToday(state?.lastShuffled)) {
@@ -67,15 +67,12 @@
     (async () => {
       const config = await getConfig();
 
-      if (
-        shouldSyncWithServerCheckbox !== config.shouldSyncWithServer &&
-        !isLoading
-      ) {
+      if (shouldSyncWithServer !== config.shouldSyncWithServer && !isLoading) {
         isLoading = true;
-        state = await getState(projectId, shouldSyncWithServerCheckbox);
+        state = await getState(projectId, shouldSyncWithServer);
         isLoading = false;
 
-        if (shouldSyncWithServerCheckbox) {
+        if (shouldSyncWithServer) {
           await subscribeToChanges();
         } else {
           await unsubscribeFromChanges();
@@ -84,14 +81,14 @@
 
       await setConfig({
         ...config,
-        shouldSyncWithServer: shouldSyncWithServerCheckbox,
+        shouldSyncWithServer: shouldSyncWithServer,
       });
     })();
   }
 
   $: if (state) {
     shuffledAttendeesViewModel = getShuffledAttendees(state);
-    setState(projectId, state, shouldSyncWithServerCheckbox);
+    setState(projectId, state, shouldSyncWithServer);
   }
 
   /**
@@ -127,11 +124,6 @@
     trackStateChanged(projectId);
   }
 
-  function cancelEditMode() {
-    isEditing = false;
-    inputValue = "";
-  }
-
   function shuffleAttendees() {
     if (!state?.attendees || state.attendees.length === 0) {
       return;
@@ -151,11 +143,16 @@
     trackCurrentAttendee(projectId, currentAttendee);
   }
 
-  function onAddClick() {
-    isEditing = true;
-    setTimeout(() => {
-      inputField.focus();
-    }, 100);
+  function toggleEditMode() {
+    isEditing = !isEditing;
+
+    if (isEditing) {
+      setTimeout(() => {
+        inputField.focus();
+      }, 100);
+    } else {
+      inputValue = "";
+    }
   }
 
   function onNextClick() {
@@ -311,7 +308,7 @@
 
       if (event === "stateChanged") {
         isLoading = true;
-        state = await getState(projectId, shouldSyncWithServerCheckbox);
+        state = await getState(projectId, shouldSyncWithServer);
         isLoading = false;
       }
     });
@@ -325,6 +322,10 @@
 
   function onShowHideClick() {
     isExpanded = !isExpanded;
+  }
+
+  function toggleShouldSyncWithServer() {
+    shouldSyncWithServer = !shouldSyncWithServer;
   }
 </script>
 
@@ -370,9 +371,7 @@
             disabled={isShuffleDisabled}><ShuffleIcon /></button
           >
         {/if}
-        <button
-          class="aui-button"
-          on:click={isEditing ? cancelEditMode : onAddClick}><CogIcon /></button
+        <button class="aui-button" on:click={toggleEditMode}><CogIcon /></button
         >
 
         <button class="aui-button" on:click={onShowHideClick}
@@ -388,21 +387,13 @@
             bind:this={inputField}
             bind:value={inputValue}
           />
-          <button class="aui-button" type="submit"><CheckIcon /></button>
-          <button class="aui-button" on:click={cancelEditMode}
-            ><CancelIcon /></button
-          >
+          <button class="aui-button" type="submit"><PlusIcon /> Add</button>
+          <button class="aui-button" on:click={toggleShouldSyncWithServer}>
+            {#if shouldSyncWithServer}<CheckIcon /> Synced{/if}
+            {#if !shouldSyncWithServer}<CancelIcon /> Not synced{/if}
+          </button>
         </form>
       {/if}
-
-      <div class="jira-standup-sync">
-        <input
-          bind:checked={shouldSyncWithServerCheckbox}
-          type="checkbox"
-          id="shouldSync"
-        />
-        <label for="shouldSync"> Sync? </label>
-      </div>
     {/if}
 
     {#if isLoading}
@@ -463,6 +454,7 @@
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
+    gap: 8px;
   }
 
   .jira-standup-spinner {
