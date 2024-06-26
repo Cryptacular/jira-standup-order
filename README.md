@@ -12,4 +12,4 @@ This extension is built using Svelte and Vite. Use the command `npm run dev` to 
 
 ## Icons
 
-Icons are from the [react-icons](https://react-icons.github.io/react-icons/) project;
+Icons are from the [react-icons](https://react-icons.github.io/react-icons/icons/bi/) project;

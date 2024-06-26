@@ -12,8 +12,10 @@
   import CancelIcon from "./icons/CancelIcon.svelte";
   import NextIcon from "./icons/NextIcon.svelte";
   import PreviousIcon from "./icons/PreviousIcon.svelte";
-  import HideIcon from "./icons/HideIcon.svelte";
   import CogIcon from "./icons/CogIcon.svelte";
+  import ShowIcon from "./icons/ShowIcon.svelte";
+  import ExpandHorizontalIcon from "./icons/ExpandHorizontalIcon.svelte";
+  import CollapseHorizontalIcon from "./icons/CollapseHorizontalIcon.svelte";
   import { getConfig, setConfig } from "./lib/config";
   import {
     subscribe,
@@ -22,7 +24,6 @@
     unsubscribe,
   } from "./lib/realtime/broadcast";
   import Spinner from "./components/Spinner.svelte";
-  import ShowIcon from "./icons/ShowIcon.svelte";
 
   const projectId = getId();
   let isLoading = true;
@@ -332,7 +333,9 @@
 <div class="jira-standup-container">
   {#if !isExpanded}
     🕴️ Jira Standup Order
-    <button class="aui-button" on:click={onShowHideClick}><ShowIcon /></button>
+    <button class="aui-button" on:click={onShowHideClick}
+      ><ExpandHorizontalIcon /></button
+    >
   {/if}
 
   {#if isExpanded}
@@ -375,7 +378,7 @@
         >
 
         <button class="aui-button" on:click={onShowHideClick}
-          ><HideIcon /></button
+          ><CollapseHorizontalIcon /></button
         >
       </div>
 
