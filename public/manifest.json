@@ -1,7 +1,7 @@
 {
   "name": "Standup order in JIRA",
   "description": "Randomise a list of attendees and show on a JIRA scrum board to determine standup order.",
-  "version": "2.11",
+  "version": "2.12",
   "manifest_version": 3,
   "icons": {
     "16": "images/icon@16px.png",

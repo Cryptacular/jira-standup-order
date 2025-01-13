@@ -13,7 +13,6 @@
   import NextIcon from "./icons/NextIcon.svelte";
   import PreviousIcon from "./icons/PreviousIcon.svelte";
   import CogIcon from "./icons/CogIcon.svelte";
-  import ShowIcon from "./icons/ShowIcon.svelte";
   import ExpandHorizontalIcon from "./icons/ExpandHorizontalIcon.svelte";
   import CollapseHorizontalIcon from "./icons/CollapseHorizontalIcon.svelte";
   import { getConfig, setConfig } from "./lib/config";
@@ -333,7 +332,7 @@
 <div class="jira-standup-container">
   {#if !isExpanded}
     🕴️ Jira Standup Order
-    <button class="aui-button" on:click={onShowHideClick}
+    <button title="Expand" class="aui-button" on:click={onShowHideClick}
       ><ExpandHorizontalIcon /></button
     >
   {/if}
@@ -361,26 +360,33 @@
         {/each}
       </span>
 
-      <div>
-        {#if state.shuffled.length > 0}
-          <button class="aui-button" on:click={onPreviousClick}
-            ><PreviousIcon /></button
+      {#if !isEditing}
+        <div>
+          {#if state.shuffled.length > 0}
+            <button
+              title="Previous"
+              class="aui-button"
+              on:click={onPreviousClick}><PreviousIcon /></button
+            >
+            <button title="Next" class="aui-button" on:click={onNextClick}
+              ><NextIcon /></button
+            >
+            <button
+              title="Shuffle"
+              class="aui-button"
+              on:click={onShuffleClick}
+              disabled={isShuffleDisabled}><ShuffleIcon /></button
+            >
+          {/if}
+          <button title="Settings" class="aui-button" on:click={toggleEditMode}
+            ><CogIcon /></button
           >
-          <button class="aui-button" on:click={onNextClick}><NextIcon /></button
-          >
-          <button
-            class="aui-button"
-            on:click={onShuffleClick}
-            disabled={isShuffleDisabled}><ShuffleIcon /></button
-          >
-        {/if}
-        <button class="aui-button" on:click={toggleEditMode}><CogIcon /></button
-        >
 
-        <button class="aui-button" on:click={onShowHideClick}
-          ><CollapseHorizontalIcon /></button
-        >
-      </div>
+          <button title="Collapse" class="aui-button" on:click={onShowHideClick}
+            ><CollapseHorizontalIcon /></button
+          >
+        </div>
+      {/if}
 
       {#if isEditing}
         <form on:submit={onSave} class="jira-standup-form">
@@ -390,11 +396,22 @@
             bind:this={inputField}
             bind:value={inputValue}
           />
-          <button class="aui-button" type="submit"><PlusIcon /> Add</button>
-          <button class="aui-button" on:click={toggleShouldSyncWithServer}>
+          <button title="Add name to list" class="aui-button" type="submit"
+            ><PlusIcon /> Add</button
+          >
+          <button
+            title="Toggle sync on/off"
+            class="aui-button"
+            on:click={toggleShouldSyncWithServer}
+          >
             {#if shouldSyncWithServer}<CheckIcon /> Synced{/if}
             {#if !shouldSyncWithServer}<CancelIcon /> Not synced{/if}
           </button>
+          <button
+            title="Close settings"
+            class="aui-button"
+            on:click={toggleEditMode}><CancelIcon /></button
+          >
         </form>
       {/if}
     {/if}
